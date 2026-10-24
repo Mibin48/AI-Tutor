@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Tutor - Interactive Voice & Whiteboard Math Tutor">
+  <title>AI Tutor - Interactive Voice & Whiteboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=KaTeX_Main:ital,wght@0,400;0,700;1,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LEFT: 70% Whiteboard Column -->
+    <main class="whiteboard-pane" id="whiteboardPane">
+      <header class="whiteboard-header">
+        <div class="header-brand">
+          <span class="brand-badge">NCERT Maths</span>
+          <h1 class="brand-title">Interactive Whiteboard</h1>
+        </div>
+        <div class="header-actions">
+          <div class="header-study-btns">
+            <button id="openQuizBtn" class="btn-study btn-quiz-trigger" title="Generate an interactive practice quiz">📝 Quiz</button>
+            <button id="openFlashcardsBtn" class="btn-study btn-flashcard-trigger" title="Generate 3D revision flashcards">🗂️ Flashcards</button>
+          </div>
+          <div class="provider-control">
+            <label for="providerSelect" class="provider-label">Engine:</label>
+            <select id="providerSelect" class="provider-dropdown" aria-label="Select AI Model Engine">
+              <option value="auto">Auto (Ollama → Gemini → OpenRouter)</option>
+              <option value="gemini">Gemini (Google AI)</option>
+              <option value="openrouter">OpenRouter (Free Tier)</option>
+              <option value="ollama">Ollama (Local)</option>
+            </select>
+          </div>
+          <span class="live-status" id="liveStatus"><span class="status-pulse"></span> Ready</span>
+        </div>
+      </header>
+
+      <div class="whiteboard-content" id="board" role="region" aria-label="Whiteboard Canvas">
+        <div class="board-welcome-card">
+          <div class="welcome-tag">AI TUTOR READY</div>
+          <h2>Ask any doubt from your textbook</h2>
+          <p>The tutor will answer step by step with spoken voice, whiteboard drawings, and motion gestures.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT: 30% Chat & Avatar Sidebar (min 320px) -->
+    <aside class="sidebar-pane" id="sidebarPane">
+      <!-- 1. Avatar Video Panel -->
+      <section class="avatar-section" id="avatarSection">
+        <div class="avatar-frame">
+          <video id="avatarVideo" class="avatar-video" muted playsinline loop aria-label="Tutor Motion Avatar"></video>
+          <div class="avatar-overlay-label">AI Tutor</div>
+        </div>
+      </section>
+
+      <!-- 2. Chat Feed -->
+      <section class="chat-section" id="chatFeed" role="log" aria-live="polite">
+        <div class="chat-bubble chat-tutor chat-welcome">
+          <div class="chat-sender-badge">AI Tutor</div>
+          <div class="chat-text">Hello! What topic or doubt would you like to explore today? You can type, speak with the mic, or try the demo button!</div>
+        </div>
+      </section>
+
+      <!-- 3. Composer -->
+      <footer class="composer-section" id="composerSection">
+        <div class="composer-input-row">
+          <input
+            id="qInput"
+            type="text"
+            class="composer-input"
+            placeholder="Ask a doubt (e.g. quadratic equations)..."
+            aria-label="Student doubt question input"
+          />
+          <button id="sendBtn" class="btn btn-primary" title="Send Question">Send</button>
+        </div>
+        <div class="composer-actions-row">
+          <button id="micBtn" class="btn btn-secondary" title="Click to speak your question">Mic</button>
+          <button id="demoBtn" class="btn btn-secondary" title="Run canned demo with real audio">Demo</button>
+          <button id="stopBtn" class="btn btn-danger" title="Stop playback" style="display: none;">Stop</button>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- Study Tools Modal (Quiz & Flashcards Generator Dialog) -->
+  <div id="studyModalOverlay" class="study-modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="studyModalTitle">
+    <div class="study-modal">
+      <div class="study-modal-header">
+        <h3 class="study-modal-title" id="studyModalTitle">Generate Practice Quiz</h3>
+        <button id="closeStudyModalBtn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="studyForm" class="study-form">
+        <input type="hidden" id="studyMode" value="quiz" />
+        <div class="study-form-group">
+          <label for="studyTopicInput" class="study-form-label">Topic or Concept</label>
+          <input
+            type="text"
+            id="studyTopicInput"
+            class="study-form-input"
+            placeholder="e.g. Rational Numbers, Linear Equations, Pythagoras Theorem"
+            required
+          />
+        </div>
+        <div class="study-form-group">
+          <label for="studyDifficultySelect" class="study-form-label">Difficulty Level</label>
+          <select id="studyDifficultySelect" class="study-form-select">
+            <option value="easy">Easy (Fundamentals & Direct Concepts)</option>
+            <option value="medium" selected>Medium (Standard Grade Level)</option>
+            <option value="hard">Hard (Multi-Step & Challenging)</option>
+          </select>
+        </div>
+        <div class="study-form-group" id="studyCountGroup">
+          <label for="studyCountSelect" class="study-form-label" id="studyCountLabel">Number of Questions</label>
+          <select id="studyCountSelect" class="study-form-select">
+            <option value="3" selected>3</option>
+            <option value="5">5</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+        <div class="study-btn-group">
+          <button type="button" id="cancelStudyBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="submitStudyBtn" class="btn btn-primary">Generate ✨</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
