@@ -6,9 +6,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 INDEX_DIR = BASE_DIR / "tutor_index"
 ASSETS_DIR = BASE_DIR / "assets"
-MOTIONS_DIR = ASSETS_DIR / "motions"
+PUBLIC_DIR = BASE_DIR / "public"
+MOTIONS_DIR = PUBLIC_DIR / "motions" if (PUBLIC_DIR / "motions").exists() else ASSETS_DIR / "motions"
 AUDIO_CACHE_DIR = Path("/tmp/audio") if os.environ.get("VERCEL") else ASSETS_DIR / "audio"
-FRONTEND_DIR = BASE_DIR / "frontend"
+FRONTEND_DIR = PUBLIC_DIR if (PUBLIC_DIR / "index.html").exists() else BASE_DIR / "frontend"
 
 # Ensure runtime directories exist safely (using /tmp on serverless environments like Vercel)
 try:

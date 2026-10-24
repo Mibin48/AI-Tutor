@@ -28,6 +28,11 @@ class ProviderRequest(BaseModel):
     provider: str
 
 
+@app.get("/api")
+def api_status_endpoint():
+    return {"status": "ok", "service": "AI Tutor API", "ready": True}
+
+
 @app.post("/api/ask", response_model=AskResponse)
 async def ask_endpoint(body: AskRequest):
     return await execute_answer_pipeline(body.question, body.session_id or "default", body.provider)

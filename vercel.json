@@ -8,14 +8,6 @@
     {
       "source": "/audio/(.*)",
       "destination": "/api/index.py"
-    },
-    {
-      "source": "/motions/(.*)",
-      "destination": "/assets/motions/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/$1"
     }
   ]
 }
