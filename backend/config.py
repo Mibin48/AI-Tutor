@@ -7,13 +7,16 @@ DATA_DIR = BASE_DIR / "data"
 INDEX_DIR = BASE_DIR / "tutor_index"
 ASSETS_DIR = BASE_DIR / "assets"
 MOTIONS_DIR = ASSETS_DIR / "motions"
-AUDIO_CACHE_DIR = ASSETS_DIR / "audio"
+AUDIO_CACHE_DIR = Path("/tmp/audio") if os.environ.get("VERCEL") else ASSETS_DIR / "audio"
 FRONTEND_DIR = BASE_DIR / "frontend"
 
-# Ensure runtime directories exist
-AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-MOTIONS_DIR.mkdir(parents=True, exist_ok=True)
-FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
+# Ensure runtime directories exist safely (using /tmp on serverless environments like Vercel)
+try:
+    AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    MOTIONS_DIR.mkdir(parents=True, exist_ok=True)
+    FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 
 # Parse .env if present
 ENV_VARS: dict[str, str] = {}

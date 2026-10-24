@@ -1,2 +1,23 @@
+# Environment variables & secrets (CRITICAL: NEVER COMMIT API KEYS)
 .env
-assets/motions/*
+.env.*
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Dynamic generated audio files (ephemeral runtime cache)
+assets/audio/*.mp3
+data/audio_cache/*.mp3
+
+# Vector DB local index cache
+tutor_index/
+
+# Deployment & IDE artifacts
+.vercel/
+.idea/
+.vscode/
+*.swp
